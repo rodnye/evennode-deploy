@@ -48,12 +48,7 @@ runs:
       shell: bash
       run: |
         ssh-keyscan -H git.evennode.com > ~/.ssh/known_hosts
-
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
+        
     - name: Set Git credentials
       shell: bash
       run: |
