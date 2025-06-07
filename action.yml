@@ -2,6 +2,10 @@ name: "EvenNode Deploy"
 description: "Deploy an application to EvenNode"
 author: "Rodny Estrada"
 
+branding:
+  icon: "upload-cloud"
+  color: "purple"
+
 inputs:
   key:
     description: "SSH private key for deployment"
