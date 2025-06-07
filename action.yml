@@ -1,0 +1,93 @@
+name: "EvenNode Deploy"
+description: "Deploy an application to EvenNode"
+author: "Rodny Estrada"
+
+inputs:
+  key:
+    description: "SSH private key for deployment"
+    required: true
+  git_email:
+    description: "Git email for commit"
+    required: true
+  git_name:
+    description: "Git name for commit"
+    required: true
+  git_url:
+    description: "EvenNode repository URL"
+    required: true
+  dot_env:
+    description: "Content of .env file"
+    required: false
+  commit_message:
+    description: "Custom commit message"
+    required: false
+  branch:
+    description: "Branch to push to"
+    required: false
+  pre_commit_command:
+    description: "Command to run before committing changes"
+    required: false
+  pre_push_command:
+    description: "Command to run before pushing to EvenNode"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ inputs.key }}
+        known_hosts: " "
+
+    - name: Add git.evennode.com to known_hosts
+      shell: bash
+      run: |
+        ssh-keyscan -H git.evennode.com > ~/.ssh/known_hosts
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set Git credentials
+      shell: bash
+      run: |
+        git config --global user.email "${{ inputs.git_email }}"
+        git config --global user.name "${{ inputs.git_name }}"
+
+    - name: Prepare .env file
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.dot_env }}" ]; then
+          echo "${{ inputs.dot_env }}" > .env
+          git add .env -f
+        fi
+      if: inputs.dot_env
+
+    - name: Run pre-commit commands
+      shell: bash
+      if: inputs.pre_commit_command
+      run: |
+        ${{ inputs.pre_commit_command }}
+
+    - name: Commit changes
+      shell: bash
+      run: |
+        git commit -m "${{ inputs.commit_message || '[evennode production build]' }}" || echo "No changes to commit"
+
+    - name: Add EvenNode remote
+      shell: bash
+      run: |
+        git remote add evennode "${{ inputs.git_url }}" || git remote set-url evennode "${{ inputs.git_url }}"
+
+    - name: Run pre-push commands
+      shell: bash
+      if: inputs.pre_push_command
+      run: |
+        ${{ inputs.pre_push_command }}
+
+    - name: Push to EvenNode
+      shell: bash
+      run: |
+        git push evennode "${{ inputs.branch || 'main' }}" -f
