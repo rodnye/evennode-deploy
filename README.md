@@ -105,3 +105,7 @@ pre_commit_command: |
 You can see a example with Next.js in action on [this workflow.](https://github.com/rodnye/inf-cujae-website/blob/8c56335a5fba293824efecab8737e5808814871c/.github/workflows/evennode.yml#L43)
 
 This approach significantly reduces deployment time as the host doesn't need to rebuild the application. The built files are included directly in the deployment.
+
+---
+
+🍊 Created by [Rodny Estrada](https://github.com/rodnye)
